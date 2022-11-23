@@ -59,6 +59,7 @@ int av_buffersink_get_frame_flags(AVFilterContext *ctx, AVFrame *frame, int flag
  */
 #define AV_BUFFERSINK_FLAG_NO_REQUEST 2
 
+#if FF_API_NEXT
 /**
  * Struct to use for initializing a buffersink context.
  */
@@ -71,6 +72,7 @@ typedef struct AVBufferSinkParams {
  *
  * Must be freed with av_free().
  */
+attribute_deprecated
 AVBufferSinkParams *av_buffersink_params_alloc(void);
 
 /**
@@ -89,7 +91,9 @@ typedef struct AVABufferSinkParams {
  *
  * Must be freed with av_free().
  */
+attribute_deprecated
 AVABufferSinkParams *av_abuffersink_params_alloc(void);
+#endif
 
 /**
  * Set the frame size for an audio buffer sink.
@@ -106,7 +110,7 @@ void av_buffersink_set_frame_size(AVFilterContext *ctx, unsigned frame_size);
  * @{
  */
 
-enum FfmpegaVMediaType av_buffersink_get_type                (const AVFilterContext *ctx);
+enum FFAVMediaType av_buffersink_get_type                (const AVFilterContext *ctx);
 AVRational       av_buffersink_get_time_base           (const AVFilterContext *ctx);
 int              av_buffersink_get_format              (const AVFilterContext *ctx);
 
