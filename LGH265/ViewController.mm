@@ -65,15 +65,15 @@ extern "C" {
 #pragma mark - XDXFFmpegVideoDecoderDelegate
 -(void)getDecodeVideoDataByFFmpeg:(CMSampleBufferRef)sampleBuffer {
     CVPixelBufferRef pix = CMSampleBufferGetImageBuffer(sampleBuffer);
-    [self.previewView displayPixelBuffer:pix];
-//    [self.displayLayer enqueueSampleBuffer:sampleBuffer];
+//    [self.previewView displayPixelBuffer:pix];
+    [self.displayLayer enqueueSampleBuffer:sampleBuffer];
 }
 
 - (void)setupUI {
     self.previewView = [[XDXPreviewView alloc] initWithFrame:self.view.frame];
     [self.view addSubview:self.previewView];
     [self.view addSubview:self.startBtn];
-//    [self.view.layer addSublayer:self.displayLayer];
+    [self.view.layer addSublayer:self.displayLayer];
 }
 
 #pragma mark - lazy

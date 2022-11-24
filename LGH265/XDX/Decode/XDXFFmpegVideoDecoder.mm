@@ -185,7 +185,7 @@ static int DecodeGetAVStreamFPSTimeBase(AVStream *st) {
         CVReturn result = CVPixelBufferCreate(kCFAllocatorDefault,
                                               videoFrame->width,
                                               videoFrame->height,
-                                              kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
+                                              kCVPixelFormatType_420YpCbCr8Planar,
                                               (__bridge CFDictionaryRef)(pixelAttributes),
                                               &pixelBuffer);//kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
         
