@@ -113,12 +113,12 @@ static int DecodeGetAVStreamFPSTimeBase(AVStream *st) {
     AVCodecContext *codecContext = NULL;
     AVCodec *codec = NULL;
     
-//    const char *codecName = av_hwdevice_get_type_name(AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
-//    enum AVHWDeviceType type = av_hwdevice_find_type_by_name(codecName);
-//    if (type != AV_HWDEVICE_TYPE_VIDEOTOOLBOX) {
-//        log4cplus_error(kModuleName, "%s: Not find hardware codec.",__func__);
-//        return NULL;
-//    }
+    const char *codecName = av_hwdevice_get_type_name(AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
+    enum AVHWDeviceType type = av_hwdevice_find_type_by_name(codecName);
+    if (type != AV_HWDEVICE_TYPE_VIDEOTOOLBOX) {
+        log4cplus_error(kModuleName, "%s: Not find hardware codec.",__func__);
+        return NULL;
+    }
     
     AVCodec *codec_dec = avcodec_find_decoder(AV_CODEC_ID_H265);
     
@@ -140,19 +140,12 @@ static int DecodeGetAVStreamFPSTimeBase(AVStream *st) {
         return NULL;
     }
     
-//    ret = InitHardwareDecoder(codecContext, type);
-//    if (ret < 0){
-//        log4cplus_error(kModuleName, "hw_decoder_init faliture");
-//        return NULL;
-//    }
-    
-    ret = avcodec_open2(codecContext, codec_dec, NULL);
+    ret = InitHardwareDecoder(codecContext, type);
     if (ret < 0){
-        log4cplus_error(kModuleName, "avcodec_open2 faliture");
+        log4cplus_error(kModuleName, "hw_decoder_init faliture");
         return NULL;
     }
 
-    
     ret = avcodec_open2(codecContext, codec, NULL);
     if (ret < 0) {
         log4cplus_error(kModuleName, "avcodec_open2 faliture");
@@ -171,37 +164,37 @@ static int DecodeGetAVStreamFPSTimeBase(AVStream *st) {
     avcodec_send_packet(videoCodecContext, &packet);
     while (0 == avcodec_receive_frame(videoCodecContext, videoFrame))
     {
-//        CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)videoFrame->data[3];
+        CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)videoFrame->data[3];
         CMTime presentationTimeStamp = kCMTimeInvalid;
         int64_t originPTS = videoFrame->pts;
         int64_t newPTS    = originPTS - baseTime;
         presentationTimeStamp = CMTimeMakeWithSeconds(current_timestamp + newPTS * av_q2d(videoStream->time_base) , fps);
         
         
-        NSDictionary *pixelAttributes = @{(NSString*)kCVPixelBufferIOSurfacePropertiesKey:@{}};
-        
-        CVPixelBufferRef pixelBuffer = NULL;
-        
-        CVReturn result = CVPixelBufferCreate(kCFAllocatorDefault,
-                                              videoFrame->width,
-                                              videoFrame->height,
-                                              kCVPixelFormatType_420YpCbCr8Planar,
-                                              (__bridge CFDictionaryRef)(pixelAttributes),
-                                              &pixelBuffer);//kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
-        
-        CVPixelBufferLockBaseAddress(pixelBuffer,0);
-        unsigned char *yDestPlane = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-        memcpy(yDestPlane, videoFrame->data[0], videoFrame->linesize[0] * videoFrame->height);
-        
-        unsigned char *uvDestPlane = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
-        memcpy(uvDestPlane, videoFrame->data[1], videoFrame->linesize[1] * videoFrame->height >> 1);
-        memcpy(uvDestPlane + (videoFrame->linesize[1] * videoFrame->height >> 1), videoFrame->data[2], videoFrame->linesize[2] * videoFrame->height >> 1);
-
-        CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-        
-        if (result != kCVReturnSuccess) {
-            NSLog(@"Unable to create cvpixelbuffer %d", result);
-        }
+//        NSDictionary *pixelAttributes = @{(NSString*)kCVPixelBufferIOSurfacePropertiesKey:@{}};
+//        
+//        CVPixelBufferRef pixelBuffer = NULL;
+//        
+//        CVReturn result = CVPixelBufferCreate(kCFAllocatorDefault,
+//                                              videoFrame->width,
+//                                              videoFrame->height,
+//                                              kCVPixelFormatType_420YpCbCr8Planar,
+//                                              (__bridge CFDictionaryRef)(pixelAttributes),
+//                                              &pixelBuffer);//kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+//        
+//        CVPixelBufferLockBaseAddress(pixelBuffer,0);
+//        unsigned char *yDestPlane = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+//        memcpy(yDestPlane, videoFrame->data[0], videoFrame->linesize[0] * videoFrame->height);
+//        
+//        unsigned char *uvDestPlane = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
+//        memcpy(uvDestPlane, videoFrame->data[1], videoFrame->linesize[1] * videoFrame->height >> 1);
+//        memcpy(uvDestPlane + (videoFrame->linesize[1] * videoFrame->height >> 1), videoFrame->data[2], videoFrame->linesize[2] * videoFrame->height >> 1);
+//
+//        CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+//        
+//        if (result != kCVReturnSuccess) {
+//            NSLog(@"Unable to create cvpixelbuffer %d", result);
+//        }
         
         CMSampleBufferRef sampleBufferRef = [self convertCVImageBufferRefToCMSampleBufferRef:pixelBuffer
                                                                    withPresentationTimeStamp:presentationTimeStamp];

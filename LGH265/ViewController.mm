@@ -126,7 +126,7 @@ FILE *fp_open;
     
     XDXAVParseHandler *parseHandler = [[XDXAVParseHandler alloc] initWithPath:path];
     [parseHandler startParseGetAVPackeWithCompletionHandler:^(BOOL isVideoFrame, BOOL isFinish, AVPacket packet1) {
-        
+//
         uint8_t *buf = packet1.data;
         int len = packet1.size;
         
@@ -144,6 +144,7 @@ FILE *fp_open;
         XDXFFmpegVideoDecoder *decoder = [[XDXFFmpegVideoDecoder alloc] initWithFormatContext:fmt_ctx videoStreamIndex:0];
         decoder.delegate = self;
         [decoder startDecodeVideoDataWithAVPacket:packet];
+        avformat_close_input(&fmt_ctx);
         av_packet_unref(&packet);
     }];
     
@@ -214,6 +215,7 @@ int open_input_buffer(AVFormatContext **fmt_ctx, uint8_t *buf, int len)
         fprintf(stderr, "Could not open input\n");
         return -1;
     }
+    
     return 0;
 }
 
