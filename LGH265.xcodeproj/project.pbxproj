@@ -22,6 +22,7 @@
 		7A3022EE292DF800001E8F9E /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A3022ED292DF7FF001E8F9E /* libiconv.tbd */; };
 		7A3022F0292DF80B001E8F9E /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A3022EF292DF80B001E8F9E /* libbz2.tbd */; };
 		7A3022F2292DF810001E8F9E /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A3022F1292DF810001E8F9E /* libz.tbd */; };
+		7A5FFE362931000D0073A028 /* unset_test.h265 in Resources */ = {isa = PBXBuildFile; fileRef = 7A5FFE352931000D0073A028 /* unset_test.h265 */; };
 		7A7D8AC0292DFD2F00B27DCF /* XDXFFmpegVideoDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7A7D8ABE292DFD2F00B27DCF /* XDXFFmpegVideoDecoder.mm */; };
 		7A7D8B4F292E054400B27DCF /* XDXPreviewView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7A7D8B4D292E054400B27DCF /* XDXPreviewView.mm */; };
 		7A7D8B5C292E0B5A00B27DCF /* XDXPreviewRGBShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 7A7D8B58292E0B5A00B27DCF /* XDXPreviewRGBShader.vsh */; };
@@ -58,6 +59,7 @@
 		7A3022ED292DF7FF001E8F9E /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
 		7A3022EF292DF80B001E8F9E /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
 		7A3022F1292DF810001E8F9E /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		7A5FFE352931000D0073A028 /* unset_test.h265 */ = {isa = PBXFileReference; lastKnownFileType = file; path = unset_test.h265; sourceTree = "<group>"; };
 		7A7D8ABC292DFCFA00B27DCF /* log4cplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = log4cplus.h; sourceTree = "<group>"; };
 		7A7D8ABE292DFD2F00B27DCF /* XDXFFmpegVideoDecoder.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = XDXFFmpegVideoDecoder.mm; sourceTree = "<group>"; };
 		7A7D8ABF292DFD2F00B27DCF /* XDXFFmpegVideoDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XDXFFmpegVideoDecoder.h; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 		7A3022DC292DF67B001E8F9E /* Res */ = {
 			isa = PBXGroup;
 			children = (
+				7A5FFE352931000D0073A028 /* unset_test.h265 */,
 				7A3022DD292DF68B001E8F9E /* test.h265 */,
 			);
 			path = Res;
@@ -599,6 +602,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7A7D8B5E292E0B5A00B27DCF /* XDXPreviewRGBShader.fsh in Resources */,
+				7A5FFE362931000D0073A028 /* unset_test.h265 in Resources */,
 				7A3022DE292DF68B001E8F9E /* test.h265 in Resources */,
 				7A7D8B5D292E0B5A00B27DCF /* XDXPreviewNV12Shader.fsh in Resources */,
 				7A7D8B5F292E0B5A00B27DCF /* XDXPreviewNV12Shader.vsh in Resources */,
