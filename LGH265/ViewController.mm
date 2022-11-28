@@ -65,45 +65,25 @@ FILE *fp_open;
     uint8_t *buf = data;
     int len = length;
     
-    // AVFormatContext 格式
     if (!m_formatContext) {
         m_formatContext = avformat_alloc_context();
+
+        // 输入数据
+        [self inputBuffer:buf len:len];
         
-        unsigned char *avio_ctx_buffer = NULL;
-        
-        bd.ptr = buf;  /* will be grown as needed by the realloc above */
-        bd.size = len; /* no data at this point */
-        
-        avio_ctx_buffer = (unsigned char *)av_malloc(len);
-        
-        /* 读内存数据 */
-        AVIOContext *avio_ctx = avio_alloc_context(avio_ctx_buffer, len, 0, NULL, read_packet, NULL, NULL);
-        m_formatContext->pb = avio_ctx;
-        m_formatContext->flags = AVFMT_FLAG_CUSTOM_IO;
-        
-        /* 打开内存缓存文件, and allocate format context */
-        AVInputFormat *in_fmt = av_find_input_format("h265");
-        int ret = avformat_open_input(&m_formatContext, "", in_fmt, NULL);
+        // 打开数据
+        int ret = [self openInput];
         if (ret < 0) {
-            fprintf(stderr, "avformat_open_input fail");
-            [self handelFailFormatContext];
-            return;
-        }
-        ret = avformat_find_stream_info(m_formatContext, NULL);
-        if (ret < 0) {
-            fprintf(stderr, "avformat_find_stream_info fail");
-            [self handelFailFormatContext];
+            [self freeFormatContext];
             return;
         }
         
+        // 创建解码器
         decoder = [[XDXFFmpegVideoDecoder alloc] initWithFormatContext:m_formatContext
                                                       videoStreamIndex:[self getAVStreamIndexWithFormatContext:m_formatContext]];
-        
         decoder.delegate = self;
-        
     } else {
-        bd.ptr = buf;  /* will be grown as needed by the realloc above */
-        bd.size = len; /* no data at this point */
+        [self inputBuffer:buf len:len];
     }
     
     // 封装成 AVPacket
@@ -111,13 +91,40 @@ FILE *fp_open;
     av_init_packet(&packet);
     int size = av_read_frame(m_formatContext, &packet);
     if (size < 0 || packet.size < 0) {
+        [self freeFormatContext];
         return;
     }
     [decoder startDecodeVideoDataWithAVPacket:packet];
     av_packet_unref(&packet);
 }
 
-- (void)handelFailFormatContext {
+- (void)inputBuffer:(uint8_t *)buf len:(int)len {
+    unsigned char *avio_ctx_buffer = NULL;
+    bd.ptr = buf;
+    bd.size = len;
+    avio_ctx_buffer = (unsigned char *)av_malloc(len);
+    AVIOContext *avio_ctx = avio_alloc_context(avio_ctx_buffer, len, 0, NULL, read_packet, NULL, NULL);
+    m_formatContext->pb = avio_ctx;
+    m_formatContext->flags = AVFMT_FLAG_CUSTOM_IO;
+}
+
+- (int)openInput {
+    AVInputFormat *in_fmt = av_find_input_format("h265");
+    int ret = avformat_open_input(&m_formatContext, "", in_fmt, NULL);
+    if (ret < 0) {
+        fprintf(stderr, "avformat_open_input fail");
+        return ret;
+    }
+    ret = avformat_find_stream_info(m_formatContext, NULL);
+    if (ret < 0) {
+        fprintf(stderr, "avformat_find_stream_info fail");
+        return ret;
+    }
+    
+    return ret;
+}
+
+- (void)freeFormatContext {
     avformat_close_input(&m_formatContext);
     m_formatContext = NULL;
 }
