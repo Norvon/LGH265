@@ -132,13 +132,39 @@ FILE *fp_open;
         
         AVFormatContext *fmt_ctx = avformat_alloc_context();
         
-        open_input_buffer(&fmt_ctx, buf, len);
+        unsigned char *avio_ctx_buffer = NULL;
+        
+        size_t avio_ctx_buffer_size = len;
+
+        AVInputFormat *in_fmt = av_find_input_format("h265");
+
+        bd.ptr = buf;  /* will be grown as needed by the realloc above */
+        bd.size = len; /* no data at this point */
+
+        avio_ctx_buffer = (unsigned char *)av_malloc(avio_ctx_buffer_size);
+
+        /* 读内存数据 */
+        AVIOContext *avio_ctx = avio_alloc_context(avio_ctx_buffer, avio_ctx_buffer_size, 0, NULL, read_packet, NULL, NULL);
+
+        fmt_ctx->pb = avio_ctx;
+        fmt_ctx->flags = AVFMT_FLAG_CUSTOM_IO;
+
+        /* 打开内存缓存文件, and allocate format context */
+        int ret = avformat_open_input(&fmt_ctx, "", in_fmt, NULL);
+        if (ret < 0)
+        {
+            fprintf(stderr, "Could not open input\n");
+            return;
+        }
+        ret = avformat_find_stream_info(fmt_ctx, NULL);
+        if (ret < 0) {
+            return;
+        }
         
         AVPacket packet;
         av_init_packet(&packet);
         int size = av_read_frame(fmt_ctx, &packet);
         if (size < 0 || packet.size < 0) {
-            int a = 3;
             return;
         }
         XDXFFmpegVideoDecoder *decoder = [[XDXFFmpegVideoDecoder alloc] initWithFormatContext:fmt_ctx videoStreamIndex:0];
