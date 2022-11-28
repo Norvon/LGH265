@@ -12,14 +12,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
-#include "libavformat/avformat.h"
+
 #include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
 #include "libavutil/avutil.h"
-#include "libswscale/swscale.h"
-#include "libswresample/swresample.h"
 #include "libavutil/opt.h"
-    
+#include "libswresample/swresample.h"
+#include "libswscale/swscale.h"
+
 #ifdef __cplusplus
 };
 #endif
@@ -32,28 +32,27 @@ typedef enum : NSUInteger {
 } XDXVideoEncodeFormat;
 
 struct XDXParseVideoDataInfo {
-    uint8_t                 *data;
-    int                     dataSize;
-    uint8_t                 *extraData;
-    int                     extraDataSize;
-    Float64                 pts;
-    Float64                 time_base;
-    int                     videoRotate;
-    int                     fps;
-    CMSampleTimingInfo      timingInfo;
-    XDXVideoEncodeFormat    videoFormat;
+    uint8_t *data;
+    int dataSize;
+    uint8_t *extraData;
+    int extraDataSize;
+    Float64 pts;
+    Float64 time_base;
+    int videoRotate;
+    int fps;
+    CMSampleTimingInfo timingInfo;
+    XDXVideoEncodeFormat videoFormat;
 };
 
 struct XDXParseAudioDataInfo {
-    uint8_t     *data;
-    int         dataSize;
-    int         channel;
-    int         sampleRate;
-    Float64     pts;
+    uint8_t *data;
+    int dataSize;
+    int channel;
+    int sampleRate;
+    Float64 pts;
 };
 
 @interface XDXAVParseHandler : NSObject
-
 
 /**
  Init Parse Handler by file path
@@ -63,10 +62,9 @@ struct XDXParseAudioDataInfo {
  */
 - (instancetype)initWithPath:(NSString *)path;
 
-
 /**
  Start parse file content
- 
+
  Note:
  1.You could get the audio / video infomation by `XDXParseVideoDataInfo` ,  `XDXParseAudioDataInfo`.
  2.You could get the audio / video infomation by `AVPacket`.
@@ -74,7 +72,6 @@ struct XDXParseAudioDataInfo {
  */
 - (void)startParseWithCompletionHandler:(void (^)(BOOL isVideoFrame, BOOL isFinish, struct XDXParseVideoDataInfo *videoInfo, struct XDXParseAudioDataInfo *audioInfo))handler;
 - (void)startParseGetAVPackeWithCompletionHandler:(void (^)(BOOL isVideoFrame, BOOL isFinish, AVPacket packet))handler;
-
 
 /**
  Get Method

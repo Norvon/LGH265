@@ -144,16 +144,14 @@ FILE *fp_open;
         return avStreamIndex;
     }
 }
-/*正确方式*/
+
 struct buffer_data {
-    uint8_t *ptr; /* 文件中对应位置指针 */
-    int size;  ///< size left in the buffer /* 文件当前指针到末尾 */
+    uint8_t *ptr;
+    int size;
 };
 
-// 重点，自定的buffer数据要在外面这里定义
 struct buffer_data bd = {0};
 
-// 用来将内存buffer的数据拷贝到buf
 int read_packet(void *opaque, uint8_t *buf, int buf_size) {
     buf_size = FFMIN(buf_size, bd.size);
     

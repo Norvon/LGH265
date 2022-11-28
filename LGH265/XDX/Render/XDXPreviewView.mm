@@ -7,9 +7,9 @@
 //
 
 #import "XDXPreviewView.h"
+#import "log4cplus.h"
 #import <AVFoundation/AVUtilities.h>
 #import <OpenGLES/ES2/glext.h>
-#import "log4cplus.h"
 
 #define kModuleName "XDXPreviewView"
 
@@ -21,8 +21,7 @@ typedef enum : NSUInteger {
     XDXPixelBufferTypeRGB,
 } XDXPixelBufferType;
 
-enum
-{
+enum {
     UNIFORM_Y,
     UNIFORM_UV,
     UNIFORM_COLOR_CONVERSION_MATRIX,
@@ -30,61 +29,72 @@ enum
 };
 GLint uniforms[NUM_UNIFORMS];
 
-enum
-{
+enum {
     ATTRIB_VERTEX,
     ATTRIB_TEXCOORD,
     NUM_ATTRIBUTES
 };
 
 GLfloat kXDXPreViewColorConversion601FullRange[] = {
-    1.0,    1.0,    1.0,
-    0.0,    -0.343, 1.765,
-    1.4,    -0.711, 0.0,
+    1.0,
+    1.0,
+    1.0,
+    0.0,
+    -0.343,
+    1.765,
+    1.4,
+    -0.711,
+    0.0,
 };
 
 GLfloat quadTextureData[] = {
-    0.0f, 1.0f,
-    1.0f, 1.0f,
-    0.0f, 0.0f,
-    1.0f, 0.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.0f,
 };
 
 GLfloat quadVertexData[] = {
-    -1.0f, -1.0f,
-    1.0f, -1.0f,
-    -1.0f, 1.0f,
-    1.0f, 1.0f,
+    -1.0f,
+    -1.0f,
+    1.0f,
+    -1.0f,
+    -1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
 };
 
-
-@interface XDXPreviewView ()
-{
+@interface XDXPreviewView () {
     GLint _backingWidth;
     GLint _backingHeight;
-    
+
     EAGLContext *_context;
     CVOpenGLESTextureCacheRef _videoTextureCache;
-    
+
     GLuint _frameBufferHandle;
     GLuint _colorBufferHandle;
-    
+
     // NV12
-    GLuint               _nv12Program;
+    GLuint _nv12Program;
     CVOpenGLESTextureRef _lumaTexture;
     CVOpenGLESTextureRef _chromaTexture;
-    const GLfloat        *_preferredConversion;
-    
+    const GLfloat *_preferredConversion;
+
     // RGB
-    GLuint                  _rgbProgram;
-    CVOpenGLESTextureRef    _renderTexture;
-    GLint                   _displayInputTextureUniform;
+    GLuint _rgbProgram;
+    CVOpenGLESTextureRef _renderTexture;
+    GLint _displayInputTextureUniform;
 }
 
-@property (nonatomic, assign) BOOL      lastFullScreen;
-@property (nonatomic, assign) CGFloat   pixelbufferWidth;
-@property (nonatomic, assign) CGFloat   pixelbufferHeight;
-@property (nonatomic, assign) CGSize    screenResolutionSize;
+@property (nonatomic, assign) BOOL lastFullScreen;
+@property (nonatomic, assign) CGFloat pixelbufferWidth;
+@property (nonatomic, assign) CGFloat pixelbufferHeight;
+@property (nonatomic, assign) CGSize screenResolutionSize;
 @property (nonatomic, assign) XDXPixelBufferType bufferType;
 @property (nonatomic, assign) XDXPixelBufferType lastBufferType;
 
@@ -96,8 +106,7 @@ GLfloat quadVertexData[] = {
 @implementation XDXPreviewView
 
 #pragma mark - life cycle
-- (id)initWithCoder:(NSCoder *)aDecoder
-{
+- (id)initWithCoder:(NSCoder *)aDecoder {
     if ((self = [super initWithCoder:aDecoder])) {
         [self initPreview];
     }
@@ -113,8 +122,8 @@ GLfloat quadVertexData[] = {
 
 - (void)dealloc {
     [self cleanUpTextures];
-    
-    if(_videoTextureCache) {
+
+    if (_videoTextureCache) {
         CFRelease(_videoTextureCache);
     }
 }
@@ -122,16 +131,16 @@ GLfloat quadVertexData[] = {
 #pragma mark - public methods
 - (void)displayPixelBuffer:(CVPixelBufferRef)pixelBuffer {
     [self displayPixelBuffer:pixelBuffer
-           videoTextureCache:_videoTextureCache
-                     context:_context
-                backingWidth:_backingWidth
-               backingHeight:_backingHeight
-           frameBufferHandle:_frameBufferHandle
-                 nv12Program:_nv12Program
-                  rgbProgram:_rgbProgram
-         preferredConversion:_preferredConversion
-  displayInputTextureUniform:_displayInputTextureUniform
-           colorBufferHandle:_colorBufferHandle];
+                 videoTextureCache:_videoTextureCache
+                           context:_context
+                      backingWidth:_backingWidth
+                     backingHeight:_backingHeight
+                 frameBufferHandle:_frameBufferHandle
+                       nv12Program:_nv12Program
+                        rgbProgram:_rgbProgram
+               preferredConversion:_preferredConversion
+        displayInputTextureUniform:_displayInputTextureUniform
+                 colorBufferHandle:_colorBufferHandle];
 }
 
 #pragma mark - private methods
@@ -149,7 +158,7 @@ GLfloat quadVertexData[] = {
     self.bufferType = XDXPixelBufferTypeNV12;
     self.lastBufferType = XDXPixelBufferTypeNone;
     _preferredConversion = kXDXPreViewColorConversion601FullRange;
-    
+
     _context = [self createOpenGLContextWithWidth:&_backingWidth
                                            height:&_backingHeight
                                 videoTextureCache:&_videoTextureCache
@@ -158,16 +167,16 @@ GLfloat quadVertexData[] = {
 }
 
 #pragma mark Render
-- (void)displayPixelBuffer:(CVPixelBufferRef)pixelBuffer videoTextureCache:(CVOpenGLESTextureCacheRef)videoTextureCache context:(EAGLContext *)context backingWidth:(GLint)backingWidth backingHeight:(GLint)backingHeight frameBufferHandle:(GLuint)frameBufferHandle nv12Program:(GLuint)nv12Program rgbProgram:(GLuint)rgbProgram preferredConversion:(const GLfloat *)preferredConversion displayInputTextureUniform:(GLuint)displayInputTextureUniform colorBufferHandle:(GLuint)colorBufferHandle{
+- (void)displayPixelBuffer:(CVPixelBufferRef)pixelBuffer videoTextureCache:(CVOpenGLESTextureCacheRef)videoTextureCache context:(EAGLContext *)context backingWidth:(GLint)backingWidth backingHeight:(GLint)backingHeight frameBufferHandle:(GLuint)frameBufferHandle nv12Program:(GLuint)nv12Program rgbProgram:(GLuint)rgbProgram preferredConversion:(const GLfloat *)preferredConversion displayInputTextureUniform:(GLuint)displayInputTextureUniform colorBufferHandle:(GLuint)colorBufferHandle {
     if (pixelBuffer == NULL) {
         return;
     }
-    
+
     CVReturn error;
-    
-    int frameWidth  = (int)CVPixelBufferGetWidth(pixelBuffer);
+
+    int frameWidth = (int)CVPixelBufferGetWidth(pixelBuffer);
     int frameHeight = (int)CVPixelBufferGetHeight(pixelBuffer);
-    
+
     if (!videoTextureCache) {
         log4cplus_error(kModuleName, "No video texture cache");
         return;
@@ -175,24 +184,24 @@ GLfloat quadVertexData[] = {
     if ([EAGLContext currentContext] != context) {
         [EAGLContext setCurrentContext:context];
     }
-    
+
     [self cleanUpTextures];
-    
+
     XDXPixelBufferType bufferType;
     if (CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange || CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) {
         bufferType = XDXPixelBufferTypeNV12;
     } else if (CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_32BGRA) {
         bufferType = XDXPixelBufferTypeRGB;
-    }else {
+    } else {
         log4cplus_error(kModuleName, "Not support current format.");
         return;
     }
-    
-    CVOpenGLESTextureRef lumaTexture,chromaTexture,renderTexture;
+
+    CVOpenGLESTextureRef lumaTexture, chromaTexture, renderTexture;
     if (bufferType == XDXPixelBufferTypeNV12) {
         // Y
         glActiveTexture(GL_TEXTURE0);
-        
+
         error = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
                                                              videoTextureCache,
                                                              pixelBuffer,
@@ -207,16 +216,16 @@ GLfloat quadVertexData[] = {
                                                              &lumaTexture);
         if (error) {
             log4cplus_error(kModuleName, "Error at CVOpenGLESTextureCacheCreateTextureFromImage %d", error);
-        }else {
+        } else {
             _lumaTexture = lumaTexture;
         }
-        
+
         glBindTexture(CVOpenGLESTextureGetTarget(lumaTexture), CVOpenGLESTextureGetName(lumaTexture));
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        
+
         // UV
         glActiveTexture(GL_TEXTURE1);
         error = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
@@ -233,16 +242,16 @@ GLfloat quadVertexData[] = {
                                                              &chromaTexture);
         if (error) {
             log4cplus_error(kModuleName, "Error at CVOpenGLESTextureCacheCreateTextureFromImage %d", error);
-        }else {
+        } else {
             _chromaTexture = chromaTexture;
         }
-        
+
         glBindTexture(CVOpenGLESTextureGetTarget(chromaTexture), CVOpenGLESTextureGetName(chromaTexture));
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        
+
     } else if (bufferType == XDXPixelBufferTypeRGB) {
         // RGB
         glActiveTexture(GL_TEXTURE0);
@@ -260,24 +269,24 @@ GLfloat quadVertexData[] = {
                                                              &renderTexture);
         if (error) {
             log4cplus_error(kModuleName, "Error at CVOpenGLESTextureCacheCreateTextureFromImage %d", error);
-        }else {
+        } else {
             _renderTexture = renderTexture;
         }
-        
+
         glBindTexture(CVOpenGLESTextureGetTarget(renderTexture), CVOpenGLESTextureGetName(renderTexture));
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
-    
+
     glBindFramebuffer(GL_FRAMEBUFFER, frameBufferHandle);
-    
+
     glViewport(0, 0, backingWidth, backingHeight);
-    
+
     glClearColor(0.1f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    
+
     if (bufferType == XDXPixelBufferTypeNV12) {
         if (self.lastBufferType != bufferType) {
             glUseProgram(nv12Program);
@@ -291,18 +300,16 @@ GLfloat quadVertexData[] = {
             glUniform1i(displayInputTextureUniform, 0);
         }
     }
-    
+
     static CGSize normalizedSamplingSize;
-    
-    if (self.lastFullScreen != self.isFullScreen || self.pixelbufferWidth != frameWidth || self.pixelbufferHeight != frameHeight
-        || normalizedSamplingSize.width == 0 || normalizedSamplingSize.height == 0  || self.screenWidth != [UIScreen mainScreen].bounds.size.width) {
-        
+
+    if (self.lastFullScreen != self.isFullScreen || self.pixelbufferWidth != frameWidth || self.pixelbufferHeight != frameHeight || normalizedSamplingSize.width == 0 || normalizedSamplingSize.height == 0 || self.screenWidth != [UIScreen mainScreen].bounds.size.width) {
         normalizedSamplingSize = [self getNormalizedSamplingSize:CGSizeMake(frameWidth, frameHeight)];
         self.lastFullScreen = self.isFullScreen;
         self.pixelbufferWidth = frameWidth;
         self.pixelbufferHeight = frameHeight;
         self.screenWidth = [UIScreen mainScreen].bounds.size.width;
-        
+
         quadVertexData[0] = -1 * normalizedSamplingSize.width;
         quadVertexData[1] = -1 * normalizedSamplingSize.height;
         quadVertexData[2] = normalizedSamplingSize.width;
@@ -312,83 +319,83 @@ GLfloat quadVertexData[] = {
         quadVertexData[6] = normalizedSamplingSize.width;
         quadVertexData[7] = normalizedSamplingSize.height;
     }
-    
+
     glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, 0, 0, quadVertexData);
     glEnableVertexAttribArray(ATTRIB_VERTEX);
-    
+
     glVertexAttribPointer(ATTRIB_TEXCOORD, 2, GL_FLOAT, 0, 0, quadTextureData);
     glEnableVertexAttribArray(ATTRIB_TEXCOORD);
-    
+
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    
+
     glBindRenderbuffer(GL_RENDERBUFFER, colorBufferHandle);
-    
+
     if ([EAGLContext currentContext] == context) {
         [context presentRenderbuffer:GL_RENDERBUFFER];
     }
-    
+
     self.lastBufferType = self.bufferType;
 }
 
 - (EAGLContext *)createOpenGLContextWithWidth:(int *)width height:(int *)height videoTextureCache:(CVOpenGLESTextureCacheRef *)videoTextureCache colorBufferHandle:(GLuint *)colorBufferHandle frameBufferHandle:(GLuint *)frameBufferHandle {
     self.contentScaleFactor = [[UIScreen mainScreen] scale];
-    
-    CAEAGLLayer *eaglLayer       = (CAEAGLLayer *)self.layer;
+
+    CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
     eaglLayer.opaque = YES;
-    eaglLayer.drawableProperties = @{kEAGLDrawablePropertyRetainedBacking   : [NSNumber numberWithBool:NO],
-                                     kEAGLDrawablePropertyColorFormat       : kEAGLColorFormatRGBA8};
-    
+    eaglLayer.drawableProperties = @{kEAGLDrawablePropertyRetainedBacking: [NSNumber numberWithBool:NO],
+                                     kEAGLDrawablePropertyColorFormat: kEAGLColorFormatRGBA8};
+
     EAGLContext *context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     [EAGLContext setCurrentContext:context];
-    
+
     [self setupBuffersWithContext:context
                             width:width
                            height:height
                 colorBufferHandle:colorBufferHandle
                 frameBufferHandle:frameBufferHandle];
-    
+
     [self loadShaderWithBufferType:XDXPixelBufferTypeNV12];
     [self loadShaderWithBufferType:XDXPixelBufferTypeRGB];
-    
+
     if (!*videoTextureCache) {
         CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, context, NULL, videoTextureCache);
         if (err != noErr)
-            log4cplus_error(kModuleName, "Error at CVOpenGLESTextureCacheCreate %d",err);
+            log4cplus_error(kModuleName, "Error at CVOpenGLESTextureCacheCreate %d", err);
     }
-    
+
     return context;
 }
 
 - (void)setupBuffersWithContext:(EAGLContext *)context width:(int *)width height:(int *)height colorBufferHandle:(GLuint *)colorBufferHandle frameBufferHandle:(GLuint *)frameBufferHandle {
     glDisable(GL_DEPTH_TEST);
-    
+
     glEnableVertexAttribArray(ATTRIB_VERTEX);
     glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-    
+
     glEnableVertexAttribArray(ATTRIB_TEXCOORD);
     glVertexAttribPointer(ATTRIB_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-    
+
     glGenFramebuffers(1, frameBufferHandle);
     glBindFramebuffer(GL_FRAMEBUFFER, *frameBufferHandle);
-    
+
     glGenRenderbuffers(1, colorBufferHandle);
     glBindRenderbuffer(GL_RENDERBUFFER, *colorBufferHandle);
-    
+
     [context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer *)self.layer];
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH , width);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, width);
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, height);
-    
+
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, *colorBufferHandle);
 }
 
 - (void)loadShaderWithBufferType:(XDXPixelBufferType)type {
     GLuint vertShader, fragShader;
-    NSURL  *vertShaderURL, *fragShaderURL;
-    
+    NSURL *vertShaderURL, *fragShaderURL;
+
     NSString *shaderName;
-    GLuint   program;
+    GLuint program;
     program = glCreateProgram();
-    
+
     if (type == XDXPixelBufferTypeNV12) {
         shaderName = @"XDXPreviewNV12Shader";
         _nv12Program = program;
@@ -396,25 +403,25 @@ GLfloat quadVertexData[] = {
         shaderName = @"XDXPreviewRGBShader";
         _rgbProgram = program;
     }
-    
+
     vertShaderURL = [[NSBundle mainBundle] URLForResource:shaderName withExtension:@"vsh"];
     if (![self compileShader:&vertShader type:GL_VERTEX_SHADER URL:vertShaderURL]) {
         log4cplus_error(kModuleName, "Failed to compile vertex shader");
         return;
     }
-    
+
     fragShaderURL = [[NSBundle mainBundle] URLForResource:shaderName withExtension:@"fsh"];
     if (![self compileShader:&fragShader type:GL_FRAGMENT_SHADER URL:fragShaderURL]) {
         log4cplus_error(kModuleName, "Failed to compile fragment shader");
         return;
     }
-    
+
     glAttachShader(program, vertShader);
     glAttachShader(program, fragShader);
-    
-    glBindAttribLocation(program, ATTRIB_VERTEX  , "position");
+
+    glBindAttribLocation(program, ATTRIB_VERTEX, "position");
     glBindAttribLocation(program, ATTRIB_TEXCOORD, "inputTextureCoordinate");
-    
+
     if (![self linkProgram:program]) {
         if (vertShader) {
             glDeleteShader(vertShader);
@@ -430,15 +437,15 @@ GLfloat quadVertexData[] = {
         }
         return;
     }
-    
+
     if (type == XDXPixelBufferTypeNV12) {
-        uniforms[UNIFORM_Y] = glGetUniformLocation(program , "luminanceTexture");
+        uniforms[UNIFORM_Y] = glGetUniformLocation(program, "luminanceTexture");
         uniforms[UNIFORM_UV] = glGetUniformLocation(program, "chrominanceTexture");
         uniforms[UNIFORM_COLOR_CONVERSION_MATRIX] = glGetUniformLocation(program, "colorConversionMatrix");
     } else if (type == XDXPixelBufferTypeRGB) {
         _displayInputTextureUniform = glGetUniformLocation(program, "inputImageTexture");
     }
-    
+
     if (vertShader) {
         glDetachShader(program, vertShader);
         glDeleteShader(vertShader);
@@ -458,15 +465,15 @@ GLfloat quadVertexData[] = {
         log4cplus_error(kModuleName, "Failed to load vertex shader: %s", [error localizedDescription].UTF8String);
         return NO;
     }
-    
+
     GLint status;
     const GLchar *source;
     source = (GLchar *)[sourceString UTF8String];
-    
+
     *shader = glCreateShader(type);
     glShaderSource(*shader, 1, &source, NULL);
     glCompileShader(*shader);
-    
+
     glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
     if (status == 0) {
         glDeleteShader(*shader);
@@ -478,7 +485,7 @@ GLfloat quadVertexData[] = {
 - (BOOL)linkProgram:(GLuint)prog {
     GLint status;
     glLinkProgram(prog);
-    
+
     glGetProgramiv(prog, GL_LINK_STATUS, &status);
     if (status == 0) {
         return NO;
@@ -493,17 +500,17 @@ GLfloat quadVertexData[] = {
         CFRelease(_lumaTexture);
         _lumaTexture = NULL;
     }
-    
+
     if (_chromaTexture) {
         CFRelease(_chromaTexture);
         _chromaTexture = NULL;
     }
-    
+
     if (_renderTexture) {
         CFRelease(_renderTexture);
         _renderTexture = NULL;
     }
-    
+
     CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
 }
 
@@ -518,7 +525,7 @@ GLfloat quadVertexData[] = {
         height = frameSize.height * self.screenResolutionSize.width / frameSize.width;
         return CGSizeMake(1.0, height / self.screenResolutionSize.height);
     }
-    
+
     if (IS_IPAD) {
         height = frameSize.height * self.screenResolutionSize.width / frameSize.width;
         return CGSizeMake(1.0, height / self.screenResolutionSize.height);
@@ -528,10 +535,10 @@ GLfloat quadVertexData[] = {
 }
 
 - (CGSize)screenResolutionSize {
-    CGFloat width  = [UIScreen mainScreen].bounds.size.width;
+    CGFloat width = [UIScreen mainScreen].bounds.size.width;
     CGFloat height = [UIScreen mainScreen].bounds.size.height;
-    
-    CGSize screenResolutionSize = CGSizeMake(width * [UIScreen mainScreen].scale,  height * [UIScreen mainScreen].scale);
+
+    CGSize screenResolutionSize = CGSizeMake(width * [UIScreen mainScreen].scale, height * [UIScreen mainScreen].scale);
     return screenResolutionSize;
 }
 

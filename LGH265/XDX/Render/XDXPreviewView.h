@@ -10,10 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-
-
 @interface XDXPreviewView : UIView
-
 
 /**
  Whether full the screen
