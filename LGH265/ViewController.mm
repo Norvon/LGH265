@@ -92,6 +92,7 @@ FILE *fp_open;
     int size = av_read_frame(m_formatContext, &packet);
     if (size < 0 || packet.size < 0) {
         [self freeFormatContext];
+        [decoder stopDecoder];
         return;
     }
     [decoder startDecodeVideoDataWithAVPacket:packet];
