@@ -770,10 +770,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 27F3HP7W75;
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = (
-					"\"$(SRCROOT)/LGH265/FFmpeg-iOS/include\"",
-					"\"$(SRCROOT)/LGH265/fat-x264/include\"",
-				);
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/LGH265/FFmpeg-iOS/include\"";
 				INFOPLIST_FILE = LGH265/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -807,10 +804,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 27F3HP7W75;
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = (
-					"\"$(SRCROOT)/LGH265/FFmpeg-iOS/include\"",
-					"\"$(SRCROOT)/LGH265/fat-x264/include\"",
-				);
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/LGH265/FFmpeg-iOS/include\"";
 				INFOPLIST_FILE = LGH265/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;

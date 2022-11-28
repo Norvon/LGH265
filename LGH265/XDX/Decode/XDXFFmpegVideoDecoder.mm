@@ -120,8 +120,6 @@ static int DecodeGetAVStreamFPSTimeBase(AVStream *st) {
         return NULL;
     }
     
-    AVCodec *codec_dec = avcodec_find_decoder(AV_CODEC_ID_H265);
-    
     int ret = av_find_best_stream(formatContext, AVMEDIA_TYPE_VIDEO, -1, -1, &codec, 0);
     if (ret < 0) {
         log4cplus_error(kModuleName, "av_find_best_stream faliture");
@@ -172,26 +170,26 @@ static int DecodeGetAVStreamFPSTimeBase(AVStream *st) {
         
         
 //        NSDictionary *pixelAttributes = @{(NSString*)kCVPixelBufferIOSurfacePropertiesKey:@{}};
-//        
+//
 //        CVPixelBufferRef pixelBuffer = NULL;
-//        
+//
 //        CVReturn result = CVPixelBufferCreate(kCFAllocatorDefault,
 //                                              videoFrame->width,
 //                                              videoFrame->height,
 //                                              kCVPixelFormatType_420YpCbCr8Planar,
 //                                              (__bridge CFDictionaryRef)(pixelAttributes),
 //                                              &pixelBuffer);//kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
-//        
+//
 //        CVPixelBufferLockBaseAddress(pixelBuffer,0);
 //        unsigned char *yDestPlane = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
 //        memcpy(yDestPlane, videoFrame->data[0], videoFrame->linesize[0] * videoFrame->height);
-//        
+//
 //        unsigned char *uvDestPlane = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
 //        memcpy(uvDestPlane, videoFrame->data[1], videoFrame->linesize[1] * videoFrame->height >> 1);
 //        memcpy(uvDestPlane + (videoFrame->linesize[1] * videoFrame->height >> 1), videoFrame->data[2], videoFrame->linesize[2] * videoFrame->height >> 1);
 //
 //        CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-//        
+//
 //        if (result != kCVReturnSuccess) {
 //            NSLog(@"Unable to create cvpixelbuffer %d", result);
 //        }
