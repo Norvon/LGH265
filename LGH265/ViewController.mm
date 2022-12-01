@@ -51,8 +51,7 @@ FILE *fp_open;
 }
 
 - (void)startDecodeByFFmpegWithIsH265Data:(BOOL)isH265 {
-    NSString *path = [[NSBundle mainBundle] pathForResource:isH265 ? @"testh265" : @"testh264" ofType:@"MOV"];
-    path = [[NSBundle mainBundle] pathForResource:@"unset_test"  ofType:@"h265"];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"test"  ofType:@"h265"];
 
     __weak typeof(self)weakSelf = self;
     XDXAVParseHandler *parseHandler = [[XDXAVParseHandler alloc] initWithPath:path];
@@ -172,14 +171,14 @@ int read_packet(void *opaque, uint8_t *buf, int buf_size) {
 -(void)getDecodeVideoDataByFFmpeg:(CMSampleBufferRef)sampleBuffer {
     CVPixelBufferRef pix = CMSampleBufferGetImageBuffer(sampleBuffer);
     [self.previewView displayPixelBuffer:pix];
-//        [self.displayLayer enqueueSampleBuffer:sampleBuffer];
+//    [self.displayLayer enqueueSampleBuffer:sampleBuffer];
 }
 
 - (void)setupUI {
     self.previewView = [[XDXPreviewView alloc] initWithFrame:self.view.frame];
     [self.view addSubview:self.previewView];
-    [self.view addSubview:self.startBtn];
     [self.view.layer addSublayer:self.displayLayer];
+    [self.view addSubview:self.startBtn];
 }
 
 #pragma mark - lazy
